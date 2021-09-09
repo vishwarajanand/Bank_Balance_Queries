@@ -134,6 +134,33 @@ class TransactionsFileParser:
                 )
 
 
+class TransactionsProcessingUtil:
+    def print_balances_on_each_day(DB):
+        transaction_parties = DB.query_transaction_parties()
+        print(f"Transaction parties: {transaction_parties}")
+
+        transaction_dates = DB.query_ascending_dates()
+        print(f"Transaction dates: {transaction_dates}")
+
+        balance_at_each_day = [[0 for _ in range(
+            transaction_parties.__len__())] for _ in range(transaction_dates.__len__())]
+
+        with open('statement.csv', 'w', newline='') as csvfile:
+            balance_writer = csv.writer(
+                csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+            balance_writer.writerow(['Date'] + [x[0]
+                                    for x in transaction_parties])
+            for transaction_date in transaction_dates:
+                party_balance_to_date = []
+                for transaction_party in transaction_parties:
+                    to_date_balance = DB.query_balance_at_given_datestr(
+                        transaction_party[0], transaction_date[0])
+                    party_balance_to_date.append(to_date_balance[0][0] or 0)
+                    print(
+                        f"{transaction_party[0]} balance on {transaction_date[0]} is {to_date_balance}")
+                balance_writer.writerow(
+                    [transaction_date[0]] + party_balance_to_date)
+
 
 def main(transactions_filepath):
     DB = TransactionDB()
@@ -142,6 +169,7 @@ def main(transactions_filepath):
         transactions_filepath)
     for transaction_record in transaction_records:
         DB.insert_transaction(transaction_record)
+
 
     DB.conn.close()
 
