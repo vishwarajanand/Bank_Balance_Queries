@@ -39,8 +39,11 @@ The program is tested against the sample input/output.
 ## Commands
 
 `python3 -m venv venv`
+
 `source venv/bin/activate`
+
 `pip install requirements.txt`
+
 `python parse_transactions.py [optional path to transactions file]`
 
 ## Notes
